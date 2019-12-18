@@ -20,7 +20,7 @@ from snntoolbox.bin.utils import get_log_keys, get_plot_keys
 from snntoolbox.parsing.utils import get_type
 from snntoolbox.utils.utils import echo
 import keras
-
+#from tensorflow import keras
 
 class AbstractSNN:
     """Abstract base class for creating spiking neural networks.
@@ -421,7 +421,10 @@ class AbstractSNN:
                                                               'top_k'))
 
         # Get batch input shape
-        batch_shape = list(parsed_model.layers[0].batch_input_shape)
+        #batch_shape = list(parsed_model.layers[0].batch_input_shape)
+        batch_shape = list(parsed_model.layers[0].input_shape[0])
+
+        #return tuple(self.get_layer_iterable()[0].batch_input_shape[1:])
         batch_shape[0] = self.batch_size
         if self.config.get('conversion', 'spike_code') == 'ttfs_dyn_thresh':
             batch_shape[0] *= 2
@@ -585,8 +588,10 @@ class AbstractSNN:
                 batch_idxs = range(self.batch_size * batch_idx,
                                    self.batch_size * (batch_idx + 1))
                 x_b_l = x_test[batch_idxs, :]
+                #x_b_l = x_test[range(2,3), :]
                 if y_test is not None:
                     y_b_l = y_test[batch_idxs, :]
+                    #y_b_l = y_test[range(2,3), :]
             elif dataflow is not None:
                 x_b_l, y_b_l = dataflow.next()
             elif dataset_format == 'aedat':

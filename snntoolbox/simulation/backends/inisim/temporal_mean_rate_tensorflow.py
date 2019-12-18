@@ -575,6 +575,80 @@ class SpikeDense(Dense, SpikeLayer):
 
         return Dense.call(self, x)
 
+class SpikeObservationNormalizationLayer(SpikeLayer):
+    """Spike Observation Normalization layer."""
+
+    def __init__(self, ob_mean, ob_std, **kwargs):
+        self.ob_mean = np.array(ob_mean, dtype=np.float32)
+        self.ob_std = np.array(ob_std, dtype=np.float32)
+        SpikeLayer.__init__(self, **kwargs)
+
+    def build(self, input_shape):
+        """Creates the layer neurons and connections.
+
+        Parameters
+        ----------
+
+        input_shape: Union[list, tuple, Any]
+            Keras tensor (future input to layer) or list/tuple of Keras tensors
+            to reference for weight shape computations.
+        """
+        Layer.build(self, input_shape)
+        self.init_neurons(input_shape)
+
+        # if self.config.getboolean('cell', 'bias_relaxation'):
+        #     self.b0 = k.variable(k.get_value(self.bias))
+        #     self.add_update([(self.bias, self.update_b())])
+
+    @spike_call
+    def call(self, x, **kwargs):
+        output = tf.clip_by_value((x - self.ob_mean) / self.ob_std, -5.0, 5.0)
+        return Layer.call(self, output)
+
+class SpikeDiscretizeActionsUniformLayer(Dense, SpikeLayer):
+    """Spike Discretize Actions Uniform layer."""
+
+    def __init__(self, num_ac_bins, adim, ahigh, alow, **kwargs):
+        self.num_ac_bins = num_ac_bins
+        self.adim = adim
+        # ahigh, alow are NumPy arrays when extracting from the environment, but when the model is loaded from a h5
+        # File they get initialised as a normal list, where operations like subtraction does not work, thereforce
+        # cast them explicitly
+        self.ahigh = np.array(ahigh)
+        self.alow = np.array(alow)
+        SpikeLayer.__init__(self, **kwargs)
+
+    def build(self, input_shape):
+        """Creates the layer neurons and connections.
+
+        Parameters
+        ----------
+
+        input_shape: Union[list, tuple, Any]
+            Keras tensor (future input to layer) or list/tuple of Keras tensors
+            to reference for weight shape computations.
+        """
+
+        Dense.build(self, input_shape)
+        self.init_neurons(input_shape)
+
+        # if self.config.getboolean('cell', 'bias_relaxation'):
+        #     self.b0 = k.variable(k.get_value(self.bias))
+        #     self.add_update([(self.bias, self.update_b())])
+
+    @spike_call
+    def call(self, x, **kwargs):
+        # Reshape to [n x i x j] where n is dynamically chosen, i equals action dimension and j equals the number
+        # of bins
+        scores_nab = tf.reshape(x, [-1, self.adim, self.num_ac_bins])
+        # This picks the bin with the greatest value
+        a = tf.argmax(scores_nab, 2)
+
+        # Then transform the interval from [0, num_ac_bins - 1] to [-1, 1] which equals alow and ahigh
+        ac_range_1a = (self.ahigh - self.alow)[None, :]
+        output =  1. / (self.num_ac_bins - 1.) * tf.keras.backend.cast(a, 'float32') * ac_range_1a + self.alow[None, :]
+
+        return Dense.call(self, output)
 
 class SpikeConv2D(Conv2D, SpikeLayer):
     """Spike 2D Convolution."""

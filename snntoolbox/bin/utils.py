@@ -65,6 +65,9 @@ def run_pipeline(config, queue=None):
 
     normset, testset = get_dataset(config)
 
+    # if testset is None:
+    #     testset = {}
+
     parsed_model = None
     if config.getboolean('tools', 'parse') and not is_stop(queue):
 
