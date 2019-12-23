@@ -70,8 +70,8 @@ def run_model(model_file_path, model_file, save_directory, record=False):
 
 # %%
 
-model_file_path = "test-dir/"
-model_file_name = "keras-ant.h5"
+model_file_path = "test-dir/agentzoo-conversion/"
+model_file_name = "keras-ant2.h5"
 
 # Lets store the video file in the same directory as the model file
 save_directory = model_file_path
