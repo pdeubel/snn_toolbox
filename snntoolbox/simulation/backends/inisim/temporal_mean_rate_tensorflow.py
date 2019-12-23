@@ -605,7 +605,7 @@ class SpikeObservationNormalizationLayer(SpikeLayer):
         output = tf.clip_by_value((x - self.ob_mean) / self.ob_std, -5.0, 5.0)
         return Layer.call(self, output)
 
-class SpikeDiscretizeActionsUniformLayer(Dense, SpikeLayer):
+class SpikeDiscretizeActionsUniformLayer(SpikeLayer):
     """Spike Discretize Actions Uniform layer."""
 
     def __init__(self, num_ac_bins, adim, ahigh, alow, **kwargs):
@@ -629,12 +629,15 @@ class SpikeDiscretizeActionsUniformLayer(Dense, SpikeLayer):
             to reference for weight shape computations.
         """
 
-        Dense.build(self, input_shape)
+        Layer.build(self, input_shape)
         self.init_neurons(input_shape)
 
         # if self.config.getboolean('cell', 'bias_relaxation'):
         #     self.b0 = k.variable(k.get_value(self.bias))
         #     self.add_update([(self.bias, self.update_b())])
+
+    def compute_output_shape(self, input_shape):
+        return (input_shape[0], self.adim)
 
     @spike_call
     def call(self, x, **kwargs):
@@ -648,7 +651,7 @@ class SpikeDiscretizeActionsUniformLayer(Dense, SpikeLayer):
         ac_range_1a = (self.ahigh - self.alow)[None, :]
         output =  1. / (self.num_ac_bins - 1.) * tf.keras.backend.cast(a, 'float32') * ac_range_1a + self.alow[None, :]
 
-        return Dense.call(self, output)
+        return Layer.call(self, output)
 
 class SpikeConv2D(Conv2D, SpikeLayer):
     """Spike 2D Convolution."""
