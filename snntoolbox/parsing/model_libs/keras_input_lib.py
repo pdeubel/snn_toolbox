@@ -5,7 +5,9 @@
 """
 
 import numpy as np
-import keras.backend as k
+#import keras.backend as k
+import tensorflow as tf
+from tensorflow.keras import backend as k
 from snntoolbox.parsing.utils import AbstractModelParser
 
 
@@ -49,7 +51,9 @@ class ModelParser(AbstractModelParser):
         return attributes
 
     def get_input_shape(self):
-        return tuple(self.get_layer_iterable()[0].batch_input_shape[1:])
+        return tuple(self.get_layer_iterable()[0].input_shape[0][1:])
+
+        #return tuple(self.get_layer_iterable()[0].batch_input_shape[1:])
 
     def get_output_shape(self, layer):
         return layer.output_shape
@@ -121,7 +125,9 @@ def load(path, filename, **kwargs):
     """
 
     import os
-    from keras import models, metrics
+    import tensorflow as tf
+    from tensorflow.keras import models, metrics
+    #from keras import models, metrics
 
     filepath = str(os.path.join(path, filename))
 
@@ -142,8 +148,9 @@ def load(path, filename, **kwargs):
         model = models.load_model(
             str(filepath + '.h5'),
             get_custom_activations_dict(filepath_custom_objects))
-        model.compile(model.optimizer, model.loss,
-                      ['accuracy', metrics.top_k_categorical_accuracy])
+        # model.compile(model.optimizer, model.loss,
+        #               ['accuracy', metrics.top_k_categorical_accuracy])
+        model.compile(tf.keras.optimizers.Adam(), tf.keras.losses.MeanSquaredError())
 
     return {'model': model, 'val_fn': model.evaluate}
 
@@ -185,7 +192,8 @@ def evaluate(val_fn, batch_size, num_to_test, x_test=None, y_test=None,
             score += val_fn(x_batch, y_batch, batch_size, verbose=0)
         score /= batches
 
-    print("Top-1 accuracy: {:.2%}".format(score[1]))
-    print("Top-5 accuracy: {:.2%}\n".format(score[2]))
-
-    return score[1]
+    #print("Top-1 accuracy: {:.2%}".format(score[1]))
+    #print("Top-5 accuracy: {:.2%}\n".format(score[2]))
+    print("Score: {}".format(score))
+    #return score[1]
+    return score
