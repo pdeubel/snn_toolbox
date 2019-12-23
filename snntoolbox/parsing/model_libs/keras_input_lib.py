@@ -127,6 +127,7 @@ def load(path, filename, **kwargs):
     """
 
     import os
+    import keras
     import tensorflow as tf
     from tensorflow.keras import models, metrics
     #from keras import models, metrics
@@ -220,10 +221,11 @@ def load(path, filename, **kwargs):
 
         custom_activation_dict = get_custom_activations_dict(filepath_custom_objects)
         model = models.load_model(
-            str(filepath + '.h5'),
+            str(filepath + '.h5'))
             #get_custom_activations_dict(filepath_custom_objects))
-            custom_objects=custom_objects)
-        model.compile(tf.keras.optimizers.Adam(), tf.keras.losses.MeanSquaredError()) #model.optimizer, model.loss,
+            #custom_objects=custom_objects)
+        optimizer = tf.keras.optimizers.Adam()
+        model.compile(optimizer, tf.keras.losses.MeanSquaredError()) #model.optimizer, model.loss,
                       #['accuracy', metrics.top_k_categorical_accuracy])
 
     return {'model': model, 'val_fn': model.evaluate}
