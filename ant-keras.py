@@ -37,17 +37,21 @@ l_dense3 = tf.keras.layers.Dense(8, use_bias=True, kernel_initializer=tf.keras.i
 #l_dense3.set_weights(w_f)
 
 
+l1 = l_dense1(inputs)
+l2 = l_dense2(l1)
+l3 = l_dense3(l2)
 
+model = tf.keras.Model(inputs=inputs, outputs=l3)
 
+#test = model.get_layer(index=0)
+#model = tf.keras.models.Sequential()
+# model.add(l_dense1)
+# model.add(l_dense2)
+# model.add(l_dense3)
+#model.compile(tf.keras.optimizers.Adam(), loss=tf.keras.losses.mean_absolute_error)
+#model.build(input_shape=(None, 28))
+model.get_layer(index=1).set_weights(w_1)
+model.get_layer(index=2).set_weights(w_2)
+model.get_layer(index=3).set_weights(w_f)
 
-model = tf.keras.models.Sequential()
-model.add(l_dense1)
-model.add(l_dense2)
-model.add(l_dense3)
-model.compile(tf.keras.optimizers.Adam(), loss=tf.keras.losses.mean_absolute_error)
-model.build(input_shape=(None, 28))
-model.layers[0].set_weights(w_1)
-model.layers[1].set_weights(w_2)
-model.layers[2].set_weights(w_f)
-
-model.save("/home/appuser/snn_toolbox/test-dir/keras-ant.h5")
+model.save("test-dir/agentzoo-conversion/keras-ant2.h5")
