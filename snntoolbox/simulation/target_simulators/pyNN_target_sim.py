@@ -181,7 +181,7 @@ class SNN(AbstractSNN):
             raise NotImplementedError
         else:
             spike_times = \
-                [np.linspace(0, self._duration, self._duration * amplitude)
+                [np.linspace(0, self._duration, np.abs(int(self._duration * amplitude)))
                  for amplitude in x_flat]
             self.layers[0].set(spike_times=spike_times)
 
